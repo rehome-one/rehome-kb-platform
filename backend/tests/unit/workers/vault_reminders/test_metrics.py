@@ -57,13 +57,15 @@ def _make_factory(session: Any):  # type: ignore[no-untyped-def]
 
 
 def _counter_value(counter: Any, **labels: str) -> float:
+    # `_value.get()` — prometheus_client internal, returns Any; explicit
+    # float() cast для mypy strict (no-any-return).
     if labels:
-        return counter.labels(**labels)._value.get()
-    return counter._value.get()
+        return float(counter.labels(**labels)._value.get())
+    return float(counter._value.get())
 
 
 def _histogram_count(histogram: Any) -> float:
-    return histogram._sum.get()
+    return float(histogram._sum.get())
 
 
 @pytest.mark.asyncio

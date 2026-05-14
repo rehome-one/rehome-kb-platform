@@ -36,9 +36,7 @@ def _make_secret(
     s.created_at = datetime.now(UTC)
     s.updated_at = datetime.now(UTC)
     s.expires_at = (
-        datetime.now(UTC) + timedelta(days=expires_in_days)
-        if expires_in_days is not None
-        else None
+        datetime.now(UTC) + timedelta(days=expires_in_days) if expires_in_days is not None else None
     )
     s.archived_at = None
     return s
@@ -71,9 +69,7 @@ def _histogram_count(histogram: Any) -> float:
 @pytest.mark.asyncio
 async def test_run_once_increments_scan_total() -> None:
     session = MagicMock()
-    session.execute = AsyncMock(
-        return_value=MagicMock(scalars=lambda: MagicMock(all=lambda: []))
-    )
+    session.execute = AsyncMock(return_value=MagicMock(scalars=lambda: MagicMock(all=lambda: [])))
     worker = VaultReminderWorker(session_factory=_make_factory(session))
 
     before = _counter_value(SCAN_TOTAL)
@@ -85,9 +81,7 @@ async def test_run_once_increments_scan_total() -> None:
 @pytest.mark.asyncio
 async def test_run_once_observes_duration() -> None:
     session = MagicMock()
-    session.execute = AsyncMock(
-        return_value=MagicMock(scalars=lambda: MagicMock(all=lambda: []))
-    )
+    session.execute = AsyncMock(return_value=MagicMock(scalars=lambda: MagicMock(all=lambda: [])))
     worker = VaultReminderWorker(session_factory=_make_factory(session))
 
     before = _histogram_count(SCAN_DURATION_SECONDS)
@@ -146,9 +140,7 @@ async def test_run_forever_increments_scan_errors_on_exception() -> None:
 @pytest.mark.asyncio
 async def test_run_once_no_secrets_no_emit_counter() -> None:
     session = MagicMock()
-    session.execute = AsyncMock(
-        return_value=MagicMock(scalars=lambda: MagicMock(all=lambda: []))
-    )
+    session.execute = AsyncMock(return_value=MagicMock(scalars=lambda: MagicMock(all=lambda: [])))
     worker = VaultReminderWorker(session_factory=_make_factory(session))
 
     before = _counter_value(EMITTED_TOTAL, category="infra")

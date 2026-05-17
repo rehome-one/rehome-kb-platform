@@ -118,6 +118,10 @@ class VaultMeView(BaseModel):
     x25519_pubkey_b64: str | None = None
     encrypted_x25519_privkey_b64: str | None = None
     has_totp: bool = False
+    # ADR-0016 Slice 4: ciphertext возвращается клиенту для local TOTP
+    # verify на unlock. None если has_totp=false. Server zero-knowledge —
+    # opaque bytes, не interpret'ит.
+    totp_secret_encrypted_b64: str | None = None
     last_unlock_at: datetime | None = None
 
 
@@ -346,12 +350,18 @@ def me_view_from_user(user: VaultUser | None) -> VaultMeView:
         return VaultMeView(is_setup=False)
     from base64 import b64encode
 
+    totp_b64 = (
+        b64encode(user.totp_secret_encrypted).decode("ascii")
+        if user.totp_secret_encrypted is not None
+        else None
+    )
     return VaultMeView(
         is_setup=True,
         argon_salt_b64=b64encode(user.argon_salt).decode("ascii"),
         x25519_pubkey_b64=b64encode(user.x25519_pubkey).decode("ascii"),
         encrypted_x25519_privkey_b64=b64encode(user.encrypted_x25519_privkey).decode("ascii"),
         has_totp=user.totp_secret_encrypted is not None,
+        totp_secret_encrypted_b64=totp_b64,
         last_unlock_at=user.last_unlock_at,
     )
 

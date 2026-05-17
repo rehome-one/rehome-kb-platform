@@ -59,11 +59,15 @@ export default function VaultShell({ me, userId }: Props): JSX.Element {
           </p>
         ) : null}
         <div className="mt-4">
-          <UnlockForm argonSaltB64={me.argon_salt_b64 ?? ""} />
+          <UnlockForm
+            argonSaltB64={me.argon_salt_b64 ?? ""}
+            hasTotp={me.has_totp}
+            totpSecretEncryptedB64={me.totp_secret_encrypted_b64}
+          />
         </div>
       </section>
     );
   }
 
-  return <UnlockedView userId={userId} />;
+  return <UnlockedView userId={userId} hasTotp={me.has_totp} />;
 }

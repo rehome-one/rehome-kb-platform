@@ -160,9 +160,7 @@ class VaultSecretWrap(Base):
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
 
-    __table_args__ = (
-        PrimaryKeyConstraint("secret_id", "user_id", name="pk_vault_secret_wraps"),
-    )
+    __table_args__ = (PrimaryKeyConstraint("secret_id", "user_id", name="pk_vault_secret_wraps"),)
 
 
 class VaultSecretBlob(Base):

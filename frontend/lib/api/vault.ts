@@ -14,6 +14,8 @@ export interface VaultMeView {
   x25519_pubkey_b64: string | null;
   encrypted_x25519_privkey_b64: string | null;
   has_totp: boolean;
+  /** Ciphertext под vaultKey, decrypt'ится клиентом для TOTP verify. */
+  totp_secret_encrypted_b64: string | null;
   last_unlock_at: string | null;
 }
 
@@ -278,4 +280,24 @@ export async function removeSecretWrap(
     `/api/v1/vault/secrets/${encodeURIComponent(secretId)}/wraps/${encodeURIComponent(userId)}`,
     { method: "DELETE" },
   );
+}
+
+// ---------------------------------------------------------------------------
+// TOTP 2FA (ADR-0016 Slice 4)
+
+export interface VaultTotpSetupInput {
+  /** TOTP secret (RFC 6238 base32) → AES-GCM encrypted под vaultKey → base64. */
+  totp_secret_encrypted_b64: string;
+}
+
+export async function setupTotp(input: VaultTotpSetupInput): Promise<VaultMeView> {
+  return apiFetch<VaultMeView>("/api/v1/vault/totp/setup", {
+    method: "POST",
+    body: JSON.stringify(input),
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
+export async function disableTotp(): Promise<void> {
+  await apiFetch<void>("/api/v1/vault/totp", { method: "DELETE" });
 }

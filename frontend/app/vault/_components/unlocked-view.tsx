@@ -1,34 +1,63 @@
 "use client";
 
 /**
- * Unlocked vault view (ADR-0016 Slice 2).
+ * Unlocked vault view (ADR-0016 Slices 2-4).
  *
  * Compoposes:
  * - Lock button.
- * - CreateSecretForm (toggle).
- * - SecretsList (decrypts titles).
- *
- * Создание / удаление trigger'ит reload через `reloadToken` bump.
+ * - Tab nav: Секреты / Группы / Безопасность.
+ * - Secrets tab: CreateSecretForm + SecretsList.
+ * - Groups tab: GroupsPanel.
+ * - Security tab: TOTP management (enable/disable).
  */
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { ApiError } from "@/lib/api/client";
+import { disableTotp } from "@/lib/api/vault";
 import { lock, touch } from "@/lib/vault/session";
 
 import CreateSecretForm from "./create-secret-form";
 import GroupsPanel from "./groups-panel";
 import SecretsList from "./secrets-list";
+import TotpSetupForm from "./totp-setup-form";
 
-type Tab = "secrets" | "groups";
+type Tab = "secrets" | "groups" | "security";
 
 interface Props {
   userId: string;
+  hasTotp: boolean;
 }
 
-export default function UnlockedView({ userId }: Props): JSX.Element {
+export default function UnlockedView({ userId, hasTotp }: Props): JSX.Element {
+  const router = useRouter();
   const [tab, setTab] = useState<Tab>("secrets");
   const [showCreate, setShowCreate] = useState(false);
   const [reloadToken, setReloadToken] = useState(0);
+
+  const [showTotpSetup, setShowTotpSetup] = useState(false);
+  const [totpDisabling, setTotpDisabling] = useState(false);
+  const [totpError, setTotpError] = useState<string | null>(null);
+
+  async function onDisableTotp(): Promise<void> {
+    if (totpDisabling) return;
+    if (!window.confirm("Отключить TOTP 2FA?")) return;
+    setTotpDisabling(true);
+    setTotpError(null);
+    try {
+      await disableTotp();
+      router.refresh();
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setTotpError(`${err.status}: ${err.message}`);
+      } else {
+        setTotpError(err instanceof Error ? err.message : "Ошибка");
+      }
+    } finally {
+      setTotpDisabling(false);
+    }
+  }
 
   return (
     <section
@@ -55,28 +84,14 @@ export default function UnlockedView({ userId }: Props): JSX.Element {
       </header>
 
       <nav className="flex gap-2 border-b border-green-300">
-        <button
-          type="button"
-          onClick={() => setTab("secrets")}
-          className={`-mb-px border-b-2 px-3 py-1.5 text-sm font-medium ${
-            tab === "secrets"
-              ? "border-gray-900 text-gray-900"
-              : "border-transparent text-gray-600 hover:text-gray-900"
-          }`}
-        >
-          Секреты
-        </button>
-        <button
-          type="button"
-          onClick={() => setTab("groups")}
-          className={`-mb-px border-b-2 px-3 py-1.5 text-sm font-medium ${
-            tab === "groups"
-              ? "border-gray-900 text-gray-900"
-              : "border-transparent text-gray-600 hover:text-gray-900"
-          }`}
-        >
-          Группы
-        </button>
+        <TabButton current={tab} value="secrets" label="Секреты" onClick={setTab} />
+        <TabButton current={tab} value="groups" label="Группы" onClick={setTab} />
+        <TabButton
+          current={tab}
+          value="security"
+          label={hasTotp ? "Безопасность · 2FA" : "Безопасность"}
+          onClick={setTab}
+        />
       </nav>
 
       <div className="rounded-md bg-white p-4">
@@ -97,10 +112,87 @@ export default function UnlockedView({ userId }: Props): JSX.Element {
               reloadToken={reloadToken}
             />
           </>
-        ) : (
+        ) : tab === "groups" ? (
           <GroupsPanel currentUserId={userId} />
+        ) : (
+          <div className="flex flex-col gap-3">
+            <h3 className="text-sm font-medium text-gray-700">
+              Двухфакторная аутентификация (TOTP)
+            </h3>
+            {hasTotp ? (
+              <>
+                <p className="rounded-md border border-green-200 bg-green-50 p-2 text-xs text-green-900">
+                  ✓ 2FA включена. При unlock&apos;е после ввода master password
+                  потребуется код из приложения-аутентификатора.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => void onDisableTotp()}
+                  disabled={totpDisabling}
+                  className="self-start rounded-md border border-red-300 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-800 hover:bg-red-100 disabled:opacity-50"
+                >
+                  {totpDisabling ? "Отключаем…" : "Отключить 2FA"}
+                </button>
+                {totpError ? (
+                  <p
+                    role="alert"
+                    className="rounded-md border border-red-200 bg-red-50 px-2 py-1 text-xs text-red-700"
+                  >
+                    {totpError}
+                  </p>
+                ) : null}
+              </>
+            ) : showTotpSetup ? (
+              <TotpSetupForm
+                accountLabel={`vault-${userId.slice(0, 8)}`}
+                onCancel={() => setShowTotpSetup(false)}
+                onSuccess={() => {
+                  setShowTotpSetup(false);
+                  router.refresh();
+                }}
+              />
+            ) : (
+              <>
+                <p className="text-xs text-gray-600">
+                  Без 2FA любой, кто узнал ваш master password, может
+                  разблокировать vault. Рекомендуем включить TOTP — это
+                  второй уровень защиты через приложение-аутентификатор.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setShowTotpSetup(true)}
+                  className="self-start rounded-md bg-gray-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-800"
+                >
+                  Включить 2FA
+                </button>
+              </>
+            )}
+          </div>
         )}
       </div>
     </section>
+  );
+}
+
+interface TabBtnProps {
+  current: Tab;
+  value: Tab;
+  label: string;
+  onClick: (value: Tab) => void;
+}
+
+function TabButton({ current, value, label, onClick }: TabBtnProps): JSX.Element {
+  return (
+    <button
+      type="button"
+      onClick={() => onClick(value)}
+      className={`-mb-px border-b-2 px-3 py-1.5 text-sm font-medium ${
+        current === value
+          ? "border-gray-900 text-gray-900"
+          : "border-transparent text-gray-600 hover:text-gray-900"
+      }`}
+    >
+      {label}
+    </button>
   );
 }

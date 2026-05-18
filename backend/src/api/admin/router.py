@@ -28,11 +28,13 @@ from src.api.admin.schemas import (
     AdminStatsPeriod,
     AdminStatsSecurity,
     LlmProvidersListResponse,
+    SystemConfig,
 )
 from src.api.admin.stats_repository import (
     AdminStatsRepository,
     get_admin_stats_repository,
 )
+from src.api.admin.system_config import build_system_config
 from src.api.auth.dependency import (
     get_current_access_levels,
     require_authenticated,
@@ -187,6 +189,38 @@ async def list_llm_providers(
     """
     _require_staff_admin(access_levels)
     return LlmProvidersListResponse(data=build_provider_catalog(settings))
+
+
+# ---------------------------------------------------------------------------
+# System config (#229, OpenAPI 04 §getSystemConfig)
+
+
+@router.get(
+    "/system-config",
+    response_model=SystemConfig,
+    summary="Системные настройки kb-модуля (staff_admin)",
+    responses={
+        401: {"description": "Не аутентифицирован"},
+        403: {"description": "Требуется staff_admin scope"},
+    },
+)
+async def get_system_config(
+    _claims: dict[str, Any] = Depends(require_authenticated),
+    access_levels: frozenset[AccessLevel] = Depends(get_current_access_levels),
+    settings: Settings = Depends(get_settings),
+) -> SystemConfig:
+    """`GET /api/v1/admin/system-config` (OpenAPI 04 §getSystemConfig).
+
+    Read-only projection текущего runtime config'а: feature_flags +
+    llm_config + webhook delivery params. rate_limits / moderation — null
+    blocks (no backend implementation yet — admin UI рендерит «—»).
+
+    PATCH endpoint (OpenAPI § updateSystemConfig) — deferred: env-based
+    config не mutable at runtime; нужна writable `system_config` table
+    с merge-into-Settings layer (отдельный PR).
+    """
+    _require_staff_admin(access_levels)
+    return build_system_config(settings)
 
 
 __all__ = ["router"]

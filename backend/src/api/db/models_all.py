@@ -6,6 +6,7 @@ Alembic autogenerate видит только те таблицы, чьи мод�
 """
 
 from src.api.admin.pd_requests_models import PersonalDataRequest
+from src.api.admin.security_incidents_models import SecurityIncident
 from src.api.admin.users_models import KbUser
 from src.api.articles.models import Article, ArticleVersion
 from src.api.audit.models import AuditLog
@@ -36,6 +37,7 @@ __all__ = [
     "PersonalDataRequest",
     "PremisesCollaborator",
     "SearchQueryLog",
+    "SecurityIncident",
     "ServiceOrder",
     "Webhook",
     "WebhookDelivery",

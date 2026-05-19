@@ -3,9 +3,11 @@
 Endpoints landed:
 - #227: GET /admin/stats
 - #228: GET /admin/llm/providers
+- #229: GET /admin/system-config
 
-Backlog: users / system-config / security-incidents / personal-data /
-llm/active (PUT) / llm/eval-runs / cache / reindex / tasks/{id}.
+Backlog: security-incidents / personal-data / llm/active (PUT) /
+llm/eval-runs / cache / reindex / tasks/{id}. kb_users CRUD (#230) —
+отдельный router в `users_router.py`.
 
 RBAC: все admin endpoints требуют `staff_admin` (STAFF + LEGAL) per
 OpenAPI «Доступ — staff_admin». В коде это означает: caller имеет

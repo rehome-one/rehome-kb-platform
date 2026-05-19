@@ -1,7 +1,7 @@
 """personal_data_requests — ФЗ-152 §15 SAR (#232)
 
 Revision ID: 0024_personal_data_requests
-Revises: 0024_merge_heads
+Revises: 0024_hr_pii_encrypted
 Create Date: 2026-05-21 01:00:00.000000
 
 Реестр заявок субъектов ПДн на provide / correct / delete / transfer
@@ -27,7 +27,7 @@ from sqlalchemy.dialects import postgresql
 from alembic import op
 
 revision: str = "0024_personal_data_requests"
-down_revision: str | None = "0024_merge_heads"
+down_revision: str | None = "0024_hr_pii_encrypted"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
@@ -133,9 +133,7 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.drop_index("ix_pd_requests_subject", table_name="personal_data_requests")
-    op.drop_index(
-        "ix_pd_requests_overdue_candidates", table_name="personal_data_requests"
-    )
+    op.drop_index("ix_pd_requests_overdue_candidates", table_name="personal_data_requests")
     op.drop_index("ix_pd_requests_active", table_name="personal_data_requests")
     op.drop_index("ix_pd_requests_created_id", table_name="personal_data_requests")
     op.drop_table("personal_data_requests")

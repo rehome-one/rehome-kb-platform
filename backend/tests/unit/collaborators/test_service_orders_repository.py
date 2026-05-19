@@ -113,9 +113,7 @@ async def test_get_for_actor_staff_sees_others_orders() -> None:
     """Staff не filter'ится по customer_sub."""
     order = _make_order(customer_sub="other-user")
     session = _mock_session()
-    session.execute = AsyncMock(
-        return_value=MagicMock(scalar_one_or_none=lambda: order)
-    )
+    session.execute = AsyncMock(return_value=MagicMock(scalar_one_or_none=lambda: order))
     repo = ServiceOrderRepository(session)
     got = await repo.get_for_actor(order.id, actor_sub="staff-1", is_staff=True)
     assert got is order
@@ -125,9 +123,7 @@ async def test_get_for_actor_staff_sees_others_orders() -> None:
 async def test_get_for_actor_non_staff_query_filters_customer_sub() -> None:
     """Non-staff query содержит WHERE customer_sub = actor."""
     session = _mock_session()
-    session.execute = AsyncMock(
-        return_value=MagicMock(scalar_one_or_none=lambda: None)
-    )
+    session.execute = AsyncMock(return_value=MagicMock(scalar_one_or_none=lambda: None))
     repo = ServiceOrderRepository(session)
     await repo.get_for_actor(uuid4(), actor_sub="user-2", is_staff=False)
     stmt = session.execute.call_args.args[0]
@@ -142,9 +138,7 @@ async def test_get_for_actor_non_staff_query_filters_customer_sub() -> None:
 @pytest.mark.asyncio
 async def test_list_filters_to_own_orders_for_non_staff() -> None:
     session = _mock_session()
-    session.execute = AsyncMock(
-        return_value=MagicMock(scalars=lambda: MagicMock(all=lambda: []))
-    )
+    session.execute = AsyncMock(return_value=MagicMock(scalars=lambda: MagicMock(all=lambda: [])))
     repo = ServiceOrderRepository(session)
     await repo.list_for_actor(actor_sub="user-3", is_staff=False)
     stmt = session.execute.call_args.args[0]
@@ -155,9 +149,7 @@ async def test_list_filters_to_own_orders_for_non_staff() -> None:
 @pytest.mark.asyncio
 async def test_list_staff_no_customer_filter() -> None:
     session = _mock_session()
-    session.execute = AsyncMock(
-        return_value=MagicMock(scalars=lambda: MagicMock(all=lambda: []))
-    )
+    session.execute = AsyncMock(return_value=MagicMock(scalars=lambda: MagicMock(all=lambda: [])))
     repo = ServiceOrderRepository(session)
     await repo.list_for_actor(actor_sub="staff-1", is_staff=True)
     stmt = session.execute.call_args.args[0]

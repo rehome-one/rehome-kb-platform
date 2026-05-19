@@ -112,9 +112,7 @@ class ServiceOrderRepository:
             stmt = stmt.where(ServiceOrder.collaborator_id == collaborator_id)
         if status is not None:
             stmt = stmt.where(ServiceOrder.status == status)
-        stmt = stmt.order_by(
-            ServiceOrder.created_at.desc(), ServiceOrder.id.desc()
-        ).limit(limit)
+        stmt = stmt.order_by(ServiceOrder.created_at.desc(), ServiceOrder.id.desc()).limit(limit)
         result = await self._session.execute(stmt)
         return list(result.scalars().all())
 
@@ -132,9 +130,7 @@ class ServiceOrderRepository:
         non-terminal могут → cancel).
         """
         if "CANCELLED" not in ALLOWED_TRANSITIONS.get(order.status, frozenset()):
-            raise InvalidStatusTransitionError(
-                f"Cannot cancel order in status={order.status}"
-            )
+            raise InvalidStatusTransitionError(f"Cannot cancel order in status={order.status}")
         order.status = "CANCELLED"
         order.cancel_reason = reason
         order.completed_at = datetime.now(UTC)

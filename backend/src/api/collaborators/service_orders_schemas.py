@@ -52,9 +52,7 @@ class ServiceOrderInput(BaseModel):
     # Денежные поля — opt-in (caller staff/CRM передаёт явно). Валидация
     # non-negative; precision: 12,2 (до 9_999_999_999.99 руб.).
     price_rub: Decimal | None = Field(default=None, ge=0, max_digits=12, decimal_places=2)
-    commission_rub: Decimal | None = Field(
-        default=None, ge=0, max_digits=12, decimal_places=2
-    )
+    commission_rub: Decimal | None = Field(default=None, ge=0, max_digits=12, decimal_places=2)
 
 
 class ServiceOrderCancelInput(BaseModel):

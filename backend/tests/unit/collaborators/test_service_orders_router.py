@@ -393,9 +393,7 @@ def test_cancel_happy_path_fires_webhook(
 ) -> None:
     order = _make_order(customer_sub="user-1", status="PENDING_COLLABORATOR")
     get_mock.return_value = order
-    cancelled = _make_order(
-        customer_sub="user-1", status="CANCELLED", order_id=order.id
-    )
+    cancelled = _make_order(customer_sub="user-1", status="CANCELLED", order_id=order.id)
     cancelled.cancel_reason = "user changed mind"
     cancelled.completed_at = datetime(2026, 5, 18, tzinfo=UTC)
     cancel_mock.return_value = cancelled

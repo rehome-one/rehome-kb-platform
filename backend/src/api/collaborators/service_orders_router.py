@@ -72,9 +72,7 @@ def _is_staff(access_levels: frozenset[AccessLevel]) -> bool:
 
 def _serialize(order: ServiceOrder) -> dict[str, Any]:
     """ServiceOrder → response dict с `customer_id` alias (OpenAPI)."""
-    return ServiceOrderResponse.model_validate(order).model_dump(
-        mode="json", by_alias=True
-    )
+    return ServiceOrderResponse.model_validate(order).model_dump(mode="json", by_alias=True)
 
 
 async def _dispatch_lifecycle_event(
@@ -131,9 +129,7 @@ async def list_service_orders(
         status=status_filter,
         limit=limit,
     )
-    return ServiceOrderListResponse(
-        data=[ServiceOrderResponse.model_validate(o) for o in rows]
-    )
+    return ServiceOrderListResponse(data=[ServiceOrderResponse.model_validate(o) for o in rows])
 
 
 @router.post(

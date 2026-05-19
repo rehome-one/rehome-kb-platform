@@ -45,9 +45,7 @@ SERVICE_ORDER_STATUSES: Final[tuple[str, ...]] = (
 
 # Terminal states — `completed_at` обязан быть set'ом, дальнейших
 # transition'ов не происходит (DB CHECK enforces).
-TERMINAL_STATUSES: Final[frozenset[str]] = frozenset(
-    {"COMPLETED", "CANCELLED", "FAILED"}
-)
+TERMINAL_STATUSES: Final[frozenset[str]] = frozenset({"COMPLETED", "CANCELLED", "FAILED"})
 
 # Allowed transitions (lifecycle, без payment). Открытые edges per ТЗ:
 #   DRAFT → PENDING_COLLABORATOR | CANCELLED
@@ -103,9 +101,7 @@ class ServiceOrder(Base):
     commission_rub: Mapped[Decimal | None] = mapped_column(
         Numeric(precision=12, scale=2), nullable=True
     )
-    payment_status: Mapped[str] = mapped_column(
-        String(32), nullable=False, server_default="HOLD"
-    )
+    payment_status: Mapped[str] = mapped_column(String(32), nullable=False, server_default="HOLD")
 
     customer_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     collaborator_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -122,9 +118,7 @@ class ServiceOrder(Base):
         server_default=func.current_timestamp(),
         onupdate=func.current_timestamp(),
     )
-    completed_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     __table_args__ = (
         CheckConstraint(

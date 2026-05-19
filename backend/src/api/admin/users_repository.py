@@ -85,9 +85,7 @@ class KbUserRepository:
         await self._session.flush()
         return user
 
-    async def update_fields(
-        self, user: KbUser, updates: dict[str, Any]
-    ) -> KbUser:
+    async def update_fields(self, user: KbUser, updates: dict[str, Any]) -> KbUser:
         """In-place update. `permissions` — JSONB requires flag_modified
         для proper change-tracking SQLAlchemy.
 

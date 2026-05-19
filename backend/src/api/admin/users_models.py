@@ -62,9 +62,7 @@ class KbUser(Base):
         default=list,
         server_default=text("'[]'::jsonb"),
     )
-    status: Mapped[str] = mapped_column(
-        String(16), nullable=False, server_default="ACTIVE"
-    )
+    status: Mapped[str] = mapped_column(String(16), nullable=False, server_default="ACTIVE")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.current_timestamp()
     )
@@ -74,12 +72,8 @@ class KbUser(Base):
         server_default=func.current_timestamp(),
         onupdate=func.current_timestamp(),
     )
-    last_login_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-    mfa_enabled: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default=text("false")
-    )
+    last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    mfa_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"))
 
     __table_args__ = (
         CheckConstraint(

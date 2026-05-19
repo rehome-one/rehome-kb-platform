@@ -51,9 +51,7 @@ def _validate_permissions(value: list[str]) -> list[str]:
         if not stripped or stripped in seen:
             continue
         if len(stripped) > _MAX_PERMISSION_LENGTH:
-            raise ValueError(
-                f"Permission exceeds {_MAX_PERMISSION_LENGTH} chars"
-            )
+            raise ValueError(f"Permission exceeds {_MAX_PERMISSION_LENGTH} chars")
         seen.add(stripped)
         cleaned.append(stripped)
     return cleaned

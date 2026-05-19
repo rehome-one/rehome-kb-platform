@@ -128,9 +128,7 @@ def test_list_tenant_returns_403(
     client: TestClient, override_repo: dict[str, AsyncMock], make_jwt: Callable[..., str]
 ) -> None:
     token = make_jwt(roles=["tenant"], sub=str(uuid4()))
-    resp = client.get(
-        "/api/v1/admin/users", headers={"Authorization": f"Bearer {token}"}
-    )
+    resp = client.get("/api/v1/admin/users", headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 403
 
 
@@ -139,9 +137,7 @@ def test_list_staff_support_returns_403(
 ) -> None:
     """staff_support без LEGAL → 403."""
     token = make_jwt(roles=["staff_support"], sub=str(uuid4()))
-    resp = client.get(
-        "/api/v1/admin/users", headers={"Authorization": f"Bearer {token}"}
-    )
+    resp = client.get("/api/v1/admin/users", headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 403
 
 
@@ -157,9 +153,7 @@ def test_list_staff_admin_returns_200(
 ) -> None:
     list_mock.return_value = ([_make_user()], False)
     token = make_jwt(roles=["staff_admin"], sub=str(uuid4()))
-    resp = client.get(
-        "/api/v1/admin/users", headers={"Authorization": f"Bearer {token}"}
-    )
+    resp = client.get("/api/v1/admin/users", headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 200, resp.text
     body = resp.json()
     assert len(body["data"]) == 1
@@ -205,9 +199,7 @@ def test_list_returns_cursor_when_has_more(
 ) -> None:
     list_mock.return_value = ([_make_user()], True)
     token = make_jwt(roles=["staff_admin"], sub=str(uuid4()))
-    resp = client.get(
-        "/api/v1/admin/users", headers={"Authorization": f"Bearer {token}"}
-    )
+    resp = client.get("/api/v1/admin/users", headers={"Authorization": f"Bearer {token}"})
     body = resp.json()
     assert body["pagination"]["has_more"] is True
     assert body["pagination"]["cursor_next"] is not None
@@ -508,5 +500,3 @@ def test_list_invalid_cursor_returns_400(
         headers={"Authorization": f"Bearer {token}"},
     )
     assert resp.status_code == 400
-
-

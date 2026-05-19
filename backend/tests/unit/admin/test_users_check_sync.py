@@ -8,10 +8,7 @@ from pathlib import Path
 from src.api.admin.users_models import KB_USER_ROLES, KB_USER_STATUSES
 
 _MIGRATION = (
-    Path(__file__).resolve().parents[3]
-    / "alembic"
-    / "versions"
-    / "20260519_010000_kb_users.py"
+    Path(__file__).resolve().parents[3] / "alembic" / "versions" / "20260519_010000_kb_users.py"
 )
 
 
